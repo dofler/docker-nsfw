@@ -1,8 +1,7 @@
-import requests, numpy, os, sys, glob, time, caffe
+import requests, numpy, os, sys, glob, time, caffe, imagehash
 from PIL import Image
 from requests_file import FileAdapter
 from flask import Flask, request, jsonify
-from PIL import Image
 from StringIO import StringIO
 
 
@@ -47,7 +46,7 @@ def resize_image(image):
 	return bytearray(resp.read())
 
 
-def compute_nsfw_score(image_data):
+def compute(image_data):
 	'''
 	Computes the image nsfw score
 	'''
@@ -56,6 +55,9 @@ def compute_nsfw_score(image_data):
 	# Lets resize the image and load the image into Caffe
 	rimg = resize_image(image_data)
 	img = caffe.io.load_image(StringIO(rimg))
+
+	# Compute the perceptional hash
+	phash = imagehash.average_hash(image_data)
 
 	# Now we will want to crop the image down.
 	H, W, _ = img.shape
@@ -72,7 +74,10 @@ def compute_nsfw_score(image_data):
 	outputs = network.forward_all(blobs=layers, **{network.inputs[0]: timg})
 
 	# now to finally return the score
-	return outputs[layers[0]][0].astype(float)[1] * 100
+	return {
+		'score': outputs[layers[0]][0].astype(float)[1] * 100,
+		'phash': phash
+	}
 
 
 @app.route('/score', methods=['POST'])
@@ -89,13 +94,14 @@ def get_score():
 
 	if image:
 		try:
-			score = compute_nsfw_score(image)
+			scores = compute(image)
 		except:
-			return jsonify({'score': None, 'error': True})
+			return jsonify({'error': True})
 		else:
-			return jsonify({'score': score, 'error': False})
+			scores['error'] = False
+			return jsonify(scores)
 	else:
-		return jsonify({'score': None, 'error': True})
+		return jsonify({'error': True})
 
 
 if __name__ == '__main__':

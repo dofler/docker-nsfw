@@ -1,8 +1,11 @@
 FROM bvlc/caffe:cpu
 
 COPY nsfw /opt/nsfw/
-RUN mkdir /images
-RUN pip install -r /opt/nsfw/requirements.txt
+
+RUN mkdir /images                                \
+    && pip install -r /opt/nsfw/requirements.txt
+
+VOLUME /images
 
 EXPOSE 8080
 
