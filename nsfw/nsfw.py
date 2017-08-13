@@ -30,7 +30,7 @@ def resize_image(image):
 	'''
 	Resizes the image to a size that is relevent to the yahoo data
 	'''
-	
+
 	# If the image isn't in RGB mode, we will need to convert it.
 	if image.mode != 'RGB':
 		image = image.convert('RGB')
@@ -51,7 +51,7 @@ def compute(image_data):
 	Computes the image nsfw score
 	'''
 	layers = app.config['CAFFE_OUTPUT_LAYERS']
-	
+
 	# Lets resize the image and load the image into Caffe
 	rimg = resize_image(image_data)
 	img = caffe.io.load_image(StringIO(rimg))
@@ -76,7 +76,7 @@ def compute(image_data):
 	# now to finally return the score
 	return {
 		'score': outputs[layers[0]][0].astype(float)[1] * 100,
-		'phash': phash
+		'phash': str(phash)
 	}
 
 
