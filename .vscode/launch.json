@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach (Remote Debug)",
+      "type": "python",
+      "request": "attach",
+      "localRoot": "${workspaceRoot}/nsfw",
+      "remoteRoot": "/opt/nsfw",
+      "port": 4002,
+      "secret": "docker-nsfw",
+      "host": "localhost"
+    }
+  ]
+}
